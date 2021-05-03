@@ -1,0 +1,7 @@
+## Author: Dimitrios Kanoulas (d.kanoulas@ucl.ac.uk)
+name: hw2
+
+### HW2 settings ##################################################
+frame_params:
+  world_frame: "world_frame"
+  robot_frame: "robot_frame"

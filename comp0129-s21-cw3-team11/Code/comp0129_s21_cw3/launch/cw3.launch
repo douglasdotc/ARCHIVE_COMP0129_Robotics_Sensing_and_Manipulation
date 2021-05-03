@@ -1,0 +1,28 @@
+<!-- . -->
+<launch>
+
+  <!--<include file="$(find panda_moveit_config)/launch/demo.launch" />-->
+
+  <include file="$(find moveit_tutorials)/doc/perception_pipeline/launch/obstacle_cw3_demo.launch" />
+
+  <node pkg="cw3"
+        name="test_cw3"
+        type="test_cw3"
+        respawn="false"
+        output="screen"
+        cwd="node"
+        args="test_cw3">
+  </node>
+
+  <node pkg="cw3"
+        name="cylinder_segment"
+        type="cylinder_segment"
+        respawn="false"
+        output="screen"
+        cwd="node"
+        args="cylinder_segment">
+  </node>
+  
+  <!-- load params from YAML file to the parameter server -->
+  <rosparam file="$(find cw3)/config/params.yaml" command="load" />
+</launch>
