@@ -1,0 +1,4 @@
+\section{PROBLEM SETUP}
+The problem we are facing here is to use the information from RGB-D camera and bumper sensors to perform the object detection and solve pick-and-place via grasping under constraints of potential obstructions that need to be cleared from the designated surface. 
+
+There are two parts of this problem. First, there needs to be a way to detect and locate the initial position and orientation of the target in the 3D scene. Second, the robot needs to pick up the target and place it onto the designated surface under the constraints, such as the designated surface being occupied by other objects. Hence, the robot needs to know the latest pose of the targeted object so that it knows where to grasps the target. The robot also needs to know whether the designated surface is free, and if not, where to move the obstructions to. We will be further discussing the existing work to handle the above-mentioned problems and their limitations.

@@ -1,0 +1,16 @@
+\section{INTRODUCTION}\label{Sec:intro}
+% Pick and place has been an age-old problem in robotics, where a robot grasps, places and then ungrasps an object. Being able to precisely transport an object in space is an essential skill that humans take for granted. Solving the pick and place problem makes it such that repetitive actions in a factory line can be automated, freeing up labour for other more complex tasks. Pick and place robots have been proven to drastically increase the efficiency of factories, greatly increasing the speed and consistency of production lines by taking part in the assembly and quality assurance of products. %insert reference for this section
+% This report will be looking at implementing a pick and place robot with the aid of an RGB camera and bumper sensors. 
+
+Robotic research has consistently been seeking for improved efficiency and productivity at a lower cost. Pick and place has been an age-old problem in robotics, where a robot grasps, places and then ungrasps an object. Automating the pick and place problem with accuracy and efficiency frees up manual labour for other more complex tasks, increasing the productivity \cite{ifr2017}. 
+
+However, the environment in real life is always complex. Apart from the object of interest, many other objects are usually on scene, resulting in potential collision with the robot when performing the pick-and-place task. Hence visual and touch sensors are required for object detection. However, in places like factory with big open space, where high-precision and high-accuracy exteroceptive sensors may not be easily available or even feasible. 
+
+Hence, we propose to use only two types of sensors, namely RGB-D camera and bumper sensors, to learn about the environment and perform the task such as pick and place in a constrained environment with obstructions in scene. We propose to store the information of the objects on the scene using point cloud and handle object extraction using Point Cloud Library (PCL). Then we proceed to use \texttt{ROS} to communicate cylinder coordinates and bumper sensor data information for pick-and-place tasks.
+
+%motivation
+%problem definition
+%who benefits from solution
+%solution outline
+%why has the problem not been solved
+%need to have multiple paragraphs

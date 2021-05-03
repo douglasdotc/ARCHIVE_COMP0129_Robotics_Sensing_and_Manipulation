@@ -1,0 +1,17 @@
+<!-- . -->
+<launch>
+
+  <include file="$(find panda_moveit_config)/launch/demo.launch" />
+
+  <node pkg="cw1"
+        name="test_cw1"
+        type="test_cw1"
+        respawn="false"
+        output="screen"
+        cwd="node"
+        args="test_cw1">
+  </node>
+  
+  <!-- load params from YAML file to the parameter server -->
+  <rosparam file="$(find cw1)/config/params.yaml" command="load" />
+</launch>

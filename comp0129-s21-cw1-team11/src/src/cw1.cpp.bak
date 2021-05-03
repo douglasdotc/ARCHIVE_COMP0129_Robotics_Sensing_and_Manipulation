@@ -1,0 +1,556 @@
+/* Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2021-, Dimitrios Kanoulas
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the copyright holder(s) nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <cw1.h>
+
+
+double finalT[4][4] = {{1,1,1,1},
+                      {1,1,1,1},
+                      {1,1,1,1},
+                      {1,1,1,1}};
+                      
+CW1::CW1 (ros::NodeHandle &nh):
+  debug_ (false)
+{
+  nh_ = nh;
+  initParams ();
+  updateParams (nh); 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::initParams ()
+{
+  // Frames
+  this->world_frame_ = "/world_frame";
+  
+  // Topics
+  this->robot_frame_ = "/robot_frame";
+  
+  // HW1-Q2: setup the names for frames {0}, {1}, {2}, and {3}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::updateParams (ros::NodeHandle &nh)
+{
+  // Frames
+  nh.getParam("/frame_params/world_frame", this->world_frame_);
+  nh.getParam("/frame_params/robot_frame", this->robot_frame_);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+std::string
+CW1::getWorldFrame ()
+{
+  return (this->world_frame_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+std::string
+CW1::getRobotFrame ()
+{
+  return (this->robot_frame_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+int
+CW1::kbhit()
+{
+  struct termios oldt, newt;
+  int ch;
+  int oldf;
+  
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+  
+  ch = getchar();
+  
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  fcntl(STDIN_FILENO, F_SETFL, oldf);
+  
+  if(ch != EOF)
+  {
+    ungetc(ch, stdin);
+    return 1;
+  }
+  
+  return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::Lab1CreateFrames ()
+{
+  // generate a robot frame attached to the world frame (0,0,0)
+  transf_.setOrigin (tf::Vector3(0.0, 0.0, 3.0));
+  transf_.setRotation (tf::Quaternion(0.0, 0.0, 0.0, 1.0)); //quaternion
+  
+  // Note that the rotation can be given in various forms (rotation matrix,
+  // axis-angle, etc), but the function setRotation gets a tf::Quaternion,
+  // thus when a different type rotation is available, it should be converted
+  // to a tf::Quaternion.
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::Lab1PublishFrames ()
+{
+  // publish world->robot
+  tranf_br_.sendTransform(tf::StampedTransform(transf_,
+                                               ros::Time::now(), 
+                                               world_frame_,
+                                               robot_frame_));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q1GenFrames ()
+{  
+  // ToDo: create transformations
+  
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q1PubFrames ()
+{
+  // ToDo: publish transformations
+  
+  return;
+}
+
+/////////////////////////////////////////////////////////
+// helper method, to be deleted later
+void
+Multiply(double mat1[4][4], double mat2[4][4]) {
+
+double mat3[4][4] = {{0,0,0,0},
+                    {0,0,0,0},
+                    {0,0,0,0},
+                    {0,0,0,0}};
+
+  for (int r = 0; r < 4; r++) {
+      for (int c = 0; c < 4; c++) {
+          for (int in = 0; in < 4; in++) {
+              mat3[r][c] += mat1[r][in] * mat2[in][c];
+          }
+      }
+  }
+
+  // update finalT
+   for (int r = 0; r < 4; r++) {
+      for (int c = 0; c < 4; c++) {
+        finalT[r][c] += mat3[r][c];
+      }
+  }
+
+
+return;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q2HomeRobot (ros::Publisher &joint_pub)
+{
+  // setup and publish the joint_state
+  // initialise the JointState message to be sent
+  sensor_msgs::JointState msg;    
+  // define fields
+  msg.header.frame_id = "";               // Empty frame ID
+  msg.header.stamp = ros::Time::now();    // Assign time
+  msg.name.resize(9);                     // A 9 unit size vector
+  msg.position.resize(9);                 // A 9 unit size vector
+
+  // assign the names of the joints 
+  msg.name = {"panda_finger_joint1", "panda_finger_joint2", "panda_joint1", "panda_joint2",
+  "panda_joint3", "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"};
+  // assign values of the home positions
+  msg.position = {0.0, 0.0, 0.0, 0.0, 0.0, -1.5708, 0.0, 1.5708, 0.785398};
+  // joint_state pub publish the message
+  joint_pub.publish(msg);
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q2PrintTFs ()
+{
+  // lookup the transformation and print it
+  // create a transform listener to get the message
+  tf::TransformListener tfListener;
+  // create 2 geometry messages to store the data
+  // 1 for transformation from hand(ee) to base(link0)
+  // 1 for transformation from hand(ee) to elbow(link2)
+  tf::StampedTransform tf2Link0;
+  tf::StampedTransform tf2Link2;
+
+  // lookup for the transformation for the two 
+  try{
+    // buffer the transformation first
+    tfListener.waitForTransform("panda_link0", "panda_hand", ros::Time(0), ros::Duration(3.0));
+    tfListener.waitForTransform("panda_link2", "panda_hand", ros::Time(0), ros::Duration(3.0));
+    // obtain the information of transformation
+    tfListener.lookupTransform("panda_link0", "panda_hand", ros::Time(0), tf2Link0);
+    tfListener.lookupTransform("panda_link2", "panda_hand", ros::Time(0), tf2Link2);
+
+  }catch (tf2::TransformException &ex) {
+    ROS_WARN("%s",ex.what());
+    ros::Duration(1.0).sleep();
+  }
+
+  // construct the rotation matrix from the quaternion for both
+  tf::Matrix3x3 rotM2Base(tf2Link0.getRotation());
+  tf::Matrix3x3 rotM2Elbow(tf2Link2.getRotation());
+
+  // create two matrices for the final value
+  double T0h[4][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,1}};
+  double T2h[4][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,1}};
+
+  double vec0h[3] = {tf2Link0.getOrigin().x(), tf2Link0.getOrigin().y(), tf2Link0.getOrigin().z()};
+  double vec2h[3] = {tf2Link2.getOrigin().x(), tf2Link2.getOrigin().y(), tf2Link2.getOrigin().z()};
+
+  for (int i = 0 ; i< 3; i++){
+    //update T0h
+    // for all elements with absolute values smaller than 0.001, take it as 0 
+    // check for the first element of the row
+    if (abs(rotM2Base.getRow(i).x()) < 0.001) {
+        T0h[i][0] =0;
+    } else{
+      T0h[i][0] = rotM2Base.getRow(i).x();
+    }
+    // check for the second element of the row
+    if (abs(rotM2Base.getRow(i).y()) < 0.001) {
+        T0h[i][1] =0;
+    } else{
+      T0h[i][1] = rotM2Base.getRow(i).y();
+    }
+    // check for the third element of the row
+    if (abs(rotM2Base.getRow(i).z()) < 0.001) {
+        T0h[i][2] =0;
+    } else{
+      T0h[i][2] = rotM2Base.getRow(i).z();
+    }
+
+    if (abs(vec0h[i]) < 0.001) {
+      T0h[i][3] = 0;
+    }else{
+       T0h[i][3] = vec0h[i];
+    }
+
+    //update T2h
+    // for all elements with absolute values smaller than 0.001, take it as 0
+    // check for the first element of the row
+    if (abs(rotM2Elbow.getRow(i).x()) < 0.001) {
+        T2h[i][0] =0;
+    } else{
+      T2h[i][0] = rotM2Elbow.getRow(i).x();
+    }
+    // check for the second element of the row
+    if (abs(rotM2Elbow.getRow(i).y()) < 0.001) {
+        T2h[i][1] =0;
+    } else{
+      T2h[i][1] = rotM2Elbow.getRow(i).y();
+    }
+    // check for the third element of the row
+    if (abs(rotM2Elbow.getRow(i).z()) < 0.001) {
+        T2h[i][2] =0;
+    } else{
+      T2h[i][2] = rotM2Elbow.getRow(i).z();
+    }
+
+    if (abs(vec2h[i]) < 0.001) {
+      T2h[i][3] = 0;
+    }else{
+       T2h[i][3] = vec2h[i];
+    }
+  }
+
+
+
+  // print out the matrices
+  // first matrix: transformation from panda_hand to the panda_link0, i.e. the base
+  // 0_T_h: transformation from panda_hand frame to panda_link0 frame
+  std::cout << "0_T_h" << std::endl;
+  for (int i = 0; i < 4; i ++){
+    std::cout << T0h[i][0] << " " 
+            << T0h[i][1] << " " 
+            << T0h[i][2] << " " 
+            << T0h[i][3] << std::endl;
+  }
+  
+  // print an empty line between the two matrix
+  std::cout << "\n" << std::endl;
+
+  // second matrix: transformation from panda_hand to the panda_link2, i.e. the base
+  // 2_T_h: transformation from panda_hand frame to panda_link2 frame
+  std::cout << "2_T_h" << std::endl;
+  for (int i = 0; i < 4; i ++){
+    std::cout << T2h[i][0] << " " 
+            << T2h[i][1] << " " 
+            << T2h[i][2] << " " 
+            << T2h[i][3] << std::endl;
+  }
+
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q2RotJoint (ros::Publisher &joint_pub)
+{
+  // setup the joint_state
+  // initialise the JointState message to be sent
+  sensor_msgs::JointState msg;    
+  // define fields
+  msg.header.frame_id = "";               // Empty frame ID
+  msg.header.stamp = ros::Time::now();    // Assign time
+  msg.name.resize(9);                     // A 9 unit size vector
+  msg.position.resize(9);                 // A 9 unit size vector
+
+  // assign the names of the joints 
+  msg.name = {"panda_finger_joint1", "panda_finger_joint2", "panda_joint1", "panda_joint2",
+  "panda_joint3", "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"};
+  // assign values of the home positions
+  // add 1.5707 to panda_joint2 on top of the home position
+  msg.position = {0.0, 0.0, 0.0, 1.5707, 0.0, -1.5708, 0.0, 1.5708, 0.785398};
+  // joint_state pub publish the message
+  joint_pub.publish(msg);
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q2PubHandPose (ros::Publisher &ee_pose_pub)
+{
+  // create tf listener to get the position and orientation from ee to link_0
+  tf::TransformListener tfListener;
+  // create stamped transform to store the data
+  // 1 for transformation from hand(ee) to base(link0)
+  tf::StampedTransform tf2Link0;
+
+  // lookup for the transformation for the two 
+  try{
+    // buffer the transformation first
+    tfListener.waitForTransform("panda_link0", "panda_hand", ros::Time(0), ros::Duration(3.0));
+    // obtain the information of transformation
+    tfListener.lookupTransform("panda_link0", "panda_hand", ros::Time(0), tf2Link0);
+
+  }catch (tf2::TransformException &ex) {
+    ROS_WARN("%s",ex.what());
+    ros::Duration(1.0).sleep();
+  }
+
+  // create and publish the end effector pose message
+  geometry_msgs::PoseStamped msg;
+  // fill the fields
+  msg.header.frame_id = "";               // Empty frame ID
+  msg.header.stamp = ros::Time::now();    // Assign time
+
+  // create point and quaternion messages for position and orientation
+  // fill in the position data
+  geometry_msgs::Point position;
+  position.x = tf2Link0.getOrigin().x();
+  position.y = tf2Link0.getOrigin().y();
+  position.z = tf2Link0.getOrigin().z();
+  // fill in the orientation data
+  geometry_msgs::Quaternion q;
+  q.x = tf2Link0.getRotation().x();
+  q.y = tf2Link0.getRotation().y();
+  q.z = tf2Link0.getRotation().z();
+  q.w = tf2Link0.getRotation().w();
+
+  msg.pose.position = position;
+  msg.pose.orientation = q;
+
+  // ee pos pub publish the message
+  ee_pose_pub.publish(msg);
+
+  return;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3AddColObj (moveit::planning_interface::PlanningSceneInterface& 
+                       planning_scene_interface)
+{
+  // BEGIN_SUB_TUTORIAL table1
+  //
+  // Creating Environment
+  // ^^^^^^^^^^^^^^^^^^^^
+  // Create vector to hold 3 collision objects.
+  std::vector<moveit_msgs::CollisionObject> collision_objects;
+  collision_objects.resize(3);
+
+  // Add the first table where the cube will originally be kept.
+  collision_objects[0].id = "table1";
+  collision_objects[0].header.frame_id = "panda_link0";
+
+  /* Define the primitive and its dimensions. */
+  collision_objects[0].primitives.resize(1);
+  collision_objects[0].primitives[0].type =
+    collision_objects[0].primitives[0].BOX;
+  collision_objects[0].primitives[0].dimensions.resize(3);
+  collision_objects[0].primitives[0].dimensions[0] = 0.2;
+  collision_objects[0].primitives[0].dimensions[1] = 0.4;
+  collision_objects[0].primitives[0].dimensions[2] = 0.4;
+
+  /* Define the pose of the table: center of the cube. */
+  collision_objects[0].primitive_poses.resize(1);
+  collision_objects[0].primitive_poses[0].position.x = 0.5;
+  collision_objects[0].primitive_poses[0].position.y = 0;
+  collision_objects[0].primitive_poses[0].position.z = 0.2;
+  // END_SUB_TUTORIAL
+
+  collision_objects[0].operation = collision_objects[0].ADD;
+
+  // BEGIN_SUB_TUTORIAL table2
+  // Add the second table where we will be placing the cube.
+  collision_objects[1].id = "table2";
+  collision_objects[1].header.frame_id = "panda_link0";
+
+  /* Define the primitive and its dimensions. */
+  collision_objects[1].primitives.resize(1);
+  collision_objects[1].primitives[0].type =
+    collision_objects[1].primitives[0].BOX;
+  collision_objects[1].primitives[0].dimensions.resize(3);
+  collision_objects[1].primitives[0].dimensions[0] = 0.4;
+  collision_objects[1].primitives[0].dimensions[1] = 0.2;
+  collision_objects[1].primitives[0].dimensions[2] = 0.4;
+
+  /* Define the pose of the table: center of the cube. */
+  collision_objects[1].primitive_poses.resize(1);
+  collision_objects[1].primitive_poses[0].position.x = 0;
+  collision_objects[1].primitive_poses[0].position.y = 0.5;
+  collision_objects[1].primitive_poses[0].position.z = 0.2;
+  // END_SUB_TUTORIAL
+
+  collision_objects[1].operation = collision_objects[1].ADD;
+
+  // BEGIN_SUB_TUTORIAL object
+  // Define the object that we will be manipulating
+  collision_objects[2].header.frame_id = "panda_link0";
+  collision_objects[2].id = "object";
+
+  /* Define the primitive and its dimensions. */
+  collision_objects[2].primitives.resize(1);
+  collision_objects[2].primitives[0].type =
+    collision_objects[1].primitives[0].BOX;
+  collision_objects[2].primitives[0].dimensions.resize(3);
+  collision_objects[2].primitives[0].dimensions[0] = 0.02;
+  collision_objects[2].primitives[0].dimensions[1] = 0.02;
+  collision_objects[2].primitives[0].dimensions[2] = 0.2;
+
+  /* Define the pose of the object: center of the cylinder. */
+  collision_objects[2].primitive_poses.resize(1);
+  collision_objects[2].primitive_poses[0].position.x = 0.5;
+  collision_objects[2].primitive_poses[0].position.y = 0;
+  collision_objects[2].primitive_poses[0].position.z = 0.5;
+  // END_SUB_TUTORIAL
+
+  collision_objects[2].operation = collision_objects[2].ADD;
+
+  planning_scene_interface.applyCollisionObjects(collision_objects);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3PubObjPose (ros::Publisher &obj_pub)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3PubEeObjClose (ros::Publisher &ee_obj_close_pub)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3EeObjClosePrint (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3ReachObj (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+ 
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3SelectSideGrasp (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3SelectTopGrasp (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3GraspObj (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3MoveObj (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void
+CW1::cw1Q3ObjTouch (moveit::planning_interface::MoveGroupInterface& move_group)
+{
+  return;
+}

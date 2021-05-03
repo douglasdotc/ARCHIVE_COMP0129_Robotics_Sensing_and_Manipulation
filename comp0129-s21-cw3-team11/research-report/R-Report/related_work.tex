@@ -1,0 +1,45 @@
+\section{RELATED WORK}
+As the problem can be subdivided into two parts, we have looked into the two sections: object detection and segmentation and detection of hindering objects in the environments. 
+\subsection{Object detection and segmentation}
+%can discuss how other work has used image recognition or point cloud for such task and the limitations
+%What are point clouds?
+There exists various ways of detecting objects in robotic research. Many work with pick-and-place and sorting as the final goal implements image processing, segmentation and 
+classification to detect and categorise the object. Kumar et al. has used feature extraction, ``Canny Method" based edge detection followed by classification using the Artificial Neural Network (ANN)\cite{kumar2014}. Vijayalaxmi et al. has used grey-level image segmentation and pre-defined positions on the conveyor belt for object detection and identification\cite{VIJAYALAXMI2013}. However, these methods are mainly for object detection and classification in 2D, and not really provide depth information of the object. Moreover, the classification is not part of the task in the problem we want to study. We then looked into the work by Tsarouchi et al., who have combined 2D vision system with data from computer-aided design (CAD) files for generation of 3D coordinates\cite{Tsarouchi2016}. However, this requires storage, mapping and maintenance of both the CAD data and vision data. Also, not all objects can be generated in CAD. 
+Börcs et al. has discussed the effective object detection method using point cloud formed by using LiDAR, followed by a classification using Convolutional Neural Network (CNN) to effectively segment, extract and identify the objects\cite{Borcs2017}. 
+
+% A point cloud is a set of 3D points that correspond to the X, Y and Z planes. These are typically gathered from: 1) Image methods, 2) Light Detection and Ranging, 3) Red Green Blue Depth (RGBD) cameras and 4) Synthetic Aperture radar (SAR) systems [1].  Depending on the type of scanning method used, extra dimensions of data can be appended to the standard point cloud, an example of this would be the RGB data of a point. The different point cloud acquisition methods also have different use cases, while lidar systems can operate even from airborne aircrafts, RGB-D cameras are restricted in range and are typically used to map indoor environments [1]. With scanning technologies becoming more accessible in recent years, the point cloud library (PCL) developed in 2011 [2] has become an essential means of processing point cloud datasets. 
+
+% %What is segmentation?
+% A fundamental step of processing point clouds is segmentation. Like image segmentation, point cloud segmentation is the clustering and labelling of point clouds regions into different categories.  The segmentation of both images and point clouds have multiple applications, examples include: the tracking, locating and classification of objects [3]. 
+
+% %Application of points clouds.
+
+% %The data acquired from RGB-D cameras are typically used for plane segmentation methods [1]. Indoor objects such as walls, ceilings, tables are all planar in nature. The extraction of the plane of these objects can prove to provide a comprehensive representation of the point clouds [4]. Plane segmentation is a complex task generally used for indoor reconstruction and mapping [4].
+
+% %Point cloud segmentation techniques
+% There are several point cloud segmentation techniques. These can be categorized into edge-based methods, region-based methods, model-based methods and graph-based methods [2]. Each of the groups of methods have pros and cons associated with them, we will briefly look at the differences in the approaches of these techniques.
+
+% Edge based methods look to detect and isolate edges as they are seen as the boundary between clusters of point clouds. The idea is to find the areas of point clouds where there is a rapid change of intensity [2]. An example of an edge based algorithm can be seen as presented by Wani and Arabnia (2003). As these groups of algorithms are only concerned with a subset of the point cloud data (edge regions), they prove to be computationally efficient [wani]. While edge-based methods can provide quick results, the accuracy is questionable as they are very sensitive to noise and outliers [2]. 
+
+% Region based methods assume that nearby points share similar properties [4].The algorithms start around an initial set of seed points, and then expands to neighbouring points that share characteristics [techn]. Initially, similar regions were identified based on proximity, and planarity of regions [techn]. Soon, variations of region based algorithms as seen in [Vosselman] proposed using colour as another similarity criteria. These methods find it difficult to find a solution between under and over segmentation [3]. This group of methods also struggles to distinguish between regions with seamless and smooth transitions between them. For these cases finding criteria for region termination becomes difficult [4]. Region based methods are better at handling outliers than edge based methods as they consider global point cloud data rather than a subset, however they are particularly sensitive to the initial seed locations[techn].
+
+% Model based methods use simple geometric shapes (plane, cylinder, cone) for grouping clusters of point clouds [3]. Points with similar mathematical representations are grouped under the same region [3]. An example of a model-based method is the famous Random Sample and Consensus (RANSAC) method. This model is used to detect geometric features such as straight lines and circles [3]. The RANSAC method is current state of the art, it is an iterative method that works by identifying the outliers of a dataset and fitting a model based on the remaining data[core]. While the RANSAC method is robust in that it is not affected by outliers and noise to the scale of other methods, an issue is that the planes detected by RANSAC may not be of the same surface [4]. As this method focuses on fitting geometrically simple shapes, it also struggles when faced with more complex shapes[core2]. 
+
+% Graphical methods view the cluster of point clouds as a graph. With each vertex being a point and the edges connecting some pairs of neighbouring points [2]. These group of methods are typically very efficient and has seen usage in robotic applications [2].
+
+%Pick and place under constraints - finding limitations of these other 
+\subsection{Detection of hindering objects in the environment}
+The ability to detect and avoid obstacles is one of the most basic functions an autonomous robot should have. The use of LIDAR, sonar and cameras as sensors is common in the field of object detection. Romdhane et al have explored obstacle detection for collision avoidance through the use of monocular and stereo camera approaches \cite{BenRomdhane2011}. However, monocular based methods are heavily dependant on a prior of an approximated location of the object for obstacle detection \cite{BenRomdhane2011}, which may not be always available. 
+
+In recent years, RBGD cameras have been widely explored as an alternative as they overcome the planar limitations of the previously mentioned sensors, providing real-time fulcrum based depth readings \cite{Peasley2013}. Peasley et al have suggested mounting an RBGD camera on the front of the mobile robot. The 3D point cloud is then transformed to a birds-eye view to create a map of obstacles in the current field of view of the objects\cite{Peasley2013}. This approach, however, is constrained to an indoor environment as a ground-plane constraint was applied. This is where it is assumed the robot will be traversing a flat ground plane, and anything above the identified ground plane can be a potential obstacle \cite{Peasley2013}. Since the robot is traversing the ground, any obstacles detected with a height above 0.5m were filtered out as the object would not be at risk of colliding with surfaces of that height. By obtaining a planar obstacle map, obstacle avoidance algorithms can then be employed. 
+
+Similarly,  Singh et al described their obstacle detection process as first segmenting point clouds into ground and non-ground planes. Then through the use of feature extraction methods, obstacles in the cameras view can be identified \cite{Singh2017}. These methods are useful and effective when the initial locations of the hindering objects are unknown or changing.
+
+%While this is an effective method for obstacle detection, this approach is limited in that the 3D problem has been transformed to a planar problem. This approach cannot be applied to a pick and place robot, when an object of interest could be placed on-top of an obstacle.
+
+
+
+
+% can talk about how other people have detected the hindering object and the limitations
+
+
